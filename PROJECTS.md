@@ -193,6 +193,7 @@ Thirty one-week projects, each with a starter script in `starters/` that downloa
 - **First plot:** A sky map in galactic coordinates of Auger's top events, sized by energy, with Centaurus A and the Amaterasu and Oh-My-God arrival directions marked.
 - **Thursday prototype:** Count events near Centaurus A and compare with 1,000 shuffled skies to get a simple significance.
 - **Stretch:** Use Auger's larger public data release (via TAP at https://dc.g-vo.org/tap, table auger3.ev_sd1500) to look for the large-scale dipole above 8 EeV.
+- **Done:** Prototype and stretch are in [`project20/`](project20/README.md). Cen A: 13 events within 25° against 11.2 expected, p ≈ 0.31 (not significant). Dipole above 8 EeV: r = 5.8% ± 2.8% at RA 144°, chance P ≈ 0.12, consistent with Auger's published 4.7% but not detectable in the public ~10% of the data alone.
 
 ### 21. Chandra X-ray source explorer ★ †
 
