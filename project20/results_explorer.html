@@ -98,10 +98,25 @@ svg text { font-family: var(--font-data); font-size: 12px; fill: var(--ink-soft)
 .findings { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .finding { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
 .finding p { font-size: 15.5px; color: var(--ink-soft); }
+.explain { background: var(--map); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+.explain h3 { font-size: 16px; }
+.explain p, .explain li { font-size: 15.5px; color: var(--ink-soft); }
+.explain ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; max-width: 72ch; }
+.explain b { color: var(--ink); }
+.meaning { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.mcard { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+.mcard .big { font-family: var(--font-data); font-size: 22px; font-weight: 500; }
+.mcard p { font-size: 15.5px; color: var(--ink-soft); }
+.mcard b { color: var(--ink); }
+.gloss { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 28px; margin: 0; }
+.gloss div { min-width: 0; border-top: 1px solid var(--line); padding-top: 10px; }
+.gloss dt { font-weight: 600; font-size: 15.5px; }
+.gloss dd { margin: 4px 0 0; font-size: 15px; color: var(--ink-soft); }
+.quote { border-left: 4px solid var(--accent); padding: 6px 0 6px 18px; font-size: 18px; max-width: 70ch; }
 ul.sources { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; color: var(--ink-soft); max-width: 80ch; }
 
 @media (max-width: 760px) {
-  .tiles, .steps, .findings, .two { grid-template-columns: minmax(0, 1fr); }
+  .tiles, .steps, .findings, .two, .meaning, .gloss { grid-template-columns: minmax(0, 1fr); }
   .readout { grid-template-columns: minmax(0, 1fr); }
   .readout .v { font-size: 20px; }
 }
@@ -119,6 +134,48 @@ ul.sources { margin: 0; padding-left: 20px; display: flex; flex-direction: colum
     <div class="tile"><span class="big hot">5.8% ± 2.8%</span><p>one-sided “dipole” above 8 EeV, close to Auger’s published 4.7%, chance probability 12%</p></div>
   </div>
 </header>
+
+<section id="meaning">
+  <div class="sec-head">
+    <span class="label">What the numbers mean</span>
+    <h2>The three headline numbers, in plain words</h2>
+  </div>
+  <div class="meaning">
+    <div class="mcard">
+      <span class="big">109 events</span>
+      <p><b>Auger</b> is the Pierre Auger Observatory in Argentina, the world’s largest cosmic-ray detector. Its 1,600 detectors cover 3,000 km², about the size of Rhode Island.</p>
+      <p>An <b>event</b> is one cosmic ray hitting the atmosphere and being detected. These are the 109 most extreme particles it caught in 16 years.</p>
+      <p><b>EeV</b> is a unit of energy: 1 EeV = 10<sup>18</sup> electron-volts. The top event, 166 EeV, carried about the energy of a baseball tossed at 40 mph, inside one particle smaller than an atom. That’s roughly 24 million times what the Large Hadron Collider gives a proton.</p>
+    </div>
+    <div class="mcard">
+      <span class="big">p ≈ 0.31</span>
+      <p><b>Centaurus A</b> is a nearby galaxy with a giant, active black hole, a popular suspect as a source. We drew a circle of radius <b>25°</b> around it. Your fist at arm’s length covers about 10° of sky.</p>
+      <p><b>13</b> particles landed in the circle. If particles came from nowhere in particular, we’d expect about <b>11.2</b> there by chance.</p>
+      <p><b>p ≈ 0.31</b> means: with no source at all, you’d still see 13 or more there about 31% of the time. It’s like getting 6 heads in 10 coin flips, which doesn’t make you suspect the coin. Scientists usually want p below 0.05, and physicists want about 1 in 3.5 million to claim a discovery. <b>Not significant</b> doesn’t prove Centaurus A isn’t a source; 109 particles just aren’t enough to tell.</p>
+    </div>
+    <div class="mcard">
+      <span class="big">5.8% ± 2.8%</span>
+      <p>A <b>dipole</b> means slightly more particles arrive from one half of the sky than the other, like rain falling a bit harder on one side of an umbrella.</p>
+      <p><b>5.8%</b> is how lopsided we measured the sky above 8 EeV. <b>± 2.8%</b> is how much that number would jump around from random luck, so our signal is only about twice the noise.</p>
+      <p>Auger found <b>4.7%</b> in 2017 with about 32,000 particles, ten times our amount, and ours agrees within the noise. <b>Chance probability 12%</b>: a perfectly even sky would give a wave this big about 1 time in 8. It’s a hint pointing the right way, not a discovery on its own.</p>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Glossary</h3>
+    <dl class="gloss">
+      <div><dt>Cosmic ray</dt><dd>An atomic nucleus (often a proton) flying through space at nearly the speed of light. When it hits our atmosphere it makes a shower of billions of secondary particles, which Auger’s detectors catch.</dd></div>
+      <div><dt>Ultra-high energy</dt><dd>Above about 1 EeV. Nobody knows for certain what can accelerate particles this much; leading suspects are giant black holes in active galaxies.</dd></div>
+      <div><dt>Galactic coordinates (l, b)</dt><dd>A map of the sky centred on our own galaxy. The Milky Way’s disk is the middle line (b = 0°) and its centre is at l = 0°. Longitude l runs 0–360° and increases to the left, as astronomers draw it.</dd></div>
+      <div><dt>Right ascension and declination</dt><dd>Sky “longitude” and “latitude” tied to the Earth. Declination is north–south; right ascension (RA) is east–west. Auger is fixed in Argentina, so how well it sees a spot depends on declination, while the Earth’s spin gives every RA equal time.</dd></div>
+      <div><dt>Shuffled sky</dt><dd>A fake sky made by keeping each event’s declination and giving it a random right ascension. It has the same blind spots as the real detector but no sources, so it shows what “just chance” looks like.</dd></div>
+      <div><dt>p-value</dt><dd>The share of shuffled skies that look at least as extreme as the real sky. Small p (like 0.01) means luck rarely does this; large p (like 0.31) means luck often does.</dd></div>
+      <div><dt>Significant</dt><dd>Unlikely enough to be luck that scientists take it seriously. Common bars: p &lt; 0.05 in many fields; “5σ” (about 1 in 3.5 million) for a discovery in physics.</dd></div>
+      <div><dt>Look-elsewhere effect</dt><dd>If you try many circle sizes, places or cutoffs and report only the best, you’ll find “signals” in pure noise. The cure is to choose the test before looking, as we did with 25°.</dd></div>
+      <div><dt>Dipole and Rayleigh analysis</dt><dd>The dipole is a one-sided excess across the whole sky. Rayleigh analysis measures it by fitting a single wave to event counts versus right ascension: its height r is the lopsidedness and its peak (phase) is the busy direction.</dd></div>
+      <div><dt>Prototype and stretch goal</dt><dd>Course terms. The prototype is what we demo Thursday (the Centaurus A test). The stretch goal is the optional extra (the dipole search).</dd></div>
+    </dl>
+  </div>
+</section>
 
 <section>
   <div class="sec-head">
@@ -144,6 +201,16 @@ ul.sources { margin: 0; padding-left: 20px; display: flex; flex-direction: colum
       <span class="key"><span class="sw" style="background:var(--dot)"></span>event (bigger = more energetic)</span>
       <span class="key"><span class="sw" style="background:var(--accent)"></span>inside the test circle (Step 2)</span>
       <span class="key"><span class="sw" style="background:var(--blue);border-radius:2px"></span>Centaurus A, Amaterasu and Oh-My-God directions</span>
+    </div>
+    <div class="explain">
+      <h3>How to read this map</h3>
+      <ul>
+        <li><b>The oval is the whole sky</b>, unrolled like a world map. The middle line is the plane of the Milky Way; the middle of the oval is the centre of our galaxy (l = 0°).</li>
+        <li><b>Each dot is one particle</b>, placed at the direction it came from. Bigger dots carried more energy (46 to 166 EeV).</li>
+        <li><b>The blue diamonds</b> mark Centaurus A and the arrival directions of two famous record particles: Oh-My-God (seen in Utah in 1991, about 320 EeV) and Amaterasu (seen by the Telescope Array in 2021, about 244 EeV). Those two were caught by northern detectors, not by Auger.</li>
+        <li><b>The upper left is nearly empty</b> because that’s northern sky Auger can barely see from Argentina. That’s a blind spot, not a lack of particles.</li>
+        <li><b>The orange circle</b> is the region tested in Step 2. A bunch of dots seems to sit inside it. Step 2 asks whether that bunch is real or luck.</li>
+      </ul>
     </div>
   </div>
 </section>
@@ -174,6 +241,16 @@ ul.sources { margin: 0; padding-left: 20px; display: flex; flex-direction: colum
     </div>
     <svg id="hist" viewBox="0 0 900 300" role="img" aria-label="Histogram of event counts in shuffled skies with the real count marked"></svg>
     <p class="verdict" id="verdict"></p>
+    <div class="explain">
+      <h3>How to read this chart</h3>
+      <ul>
+        <li><b>Each blue bar</b> counts how many of the 1,000 shuffled skies got that number of particles inside the circle. Together they show the range that pure chance produces.</li>
+        <li><b>The orange line</b> is the real sky. If it sat far to the right of all the bars, almost no shuffled sky could match it, and the excess would be hard to explain by luck.</li>
+        <li><b>Here the orange line sits inside the pile of bars</b>, so lots of shuffled skies did as well as the real one. That’s what p ≈ 0.31 means.</li>
+        <li><b>The three boxes above the chart:</b> “Real sky” is the count in the circle, “Average shuffled sky” is what chance gives on average, and the p-value is the share of shuffled skies that matched or beat the real count.</li>
+        <li><b>Try it:</b> switch the target, change the radius, or press the button to make new random skies. The p-value moves a little each time, because the shuffles are random.</li>
+      </ul>
+    </div>
     <p class="note"><b>A warning about the slider.</b> If you try many circle sizes and report only the best one, you will fool yourself. This is called the look-elsewhere effect. The fair answer is the one chosen before looking: 25° around Centaurus A gives p ≈ 0.31 in the Python analysis. Across every radius from 5° to 60°, the smallest p is about 0.11, still not significant.</p>
   </div>
 </section>
@@ -212,6 +289,16 @@ ul.sources { margin: 0; padding-left: 20px; display: flex; flex-direction: colum
       </div>
     </div>
     <p class="verdict" id="dVerdict"></p>
+    <div class="explain">
+      <h3>How to read these charts</h3>
+      <ul>
+        <li><b>Right chart, dots:</b> the sky is split into twelve 30° slices of right ascension (east–west). Each dot is the number of particles from that slice divided by the average, so 1.00 means average and 1.05 means 5% more than average.</li>
+        <li><b>Right chart, vertical bars:</b> how far each dot could wander from luck alone. Many bars overlap 1.00, which is why the signal is weak.</li>
+        <li><b>Orange wave:</b> the best-fitting wave through the dots. Its height is the 5.8% lopsidedness, and its peak (144°) is the busiest direction. <b>Dashed blue wave:</b> Auger’s 2017 result from ten times more data, for comparison.</li>
+        <li><b>Left map:</b> red areas get more particles than a smooth sky would, blue areas fewer. There are fewer near the centre of our galaxy (+) and more on the far side, roughly toward the direction Auger published (✕). That hints these particles come from outside the Milky Way.</li>
+        <li><b>The energy slider</b> changes which particles are included. A higher cutoff leaves fewer particles, so the result gets noisier: the wave can look bigger without being more trustworthy.</li>
+      </ul>
+    </div>
   </div>
 </section>
 
@@ -225,6 +312,14 @@ ul.sources { margin: 0; padding-left: 20px; display: flex; flex-direction: colum
     <div class="finding"><h3>Dipole above 8 EeV</h3><p>A 5.8% ± 2.8% wave at right ascension 144°, matching Auger’s 4.7% within the errors. On its own it has a 12% chance of being noise.</p></div>
     <div class="finding"><h3>What would settle it</h3><p>About ten times more events. Auger’s full dataset shows the dipole at 5.2σ. This analysis skips Auger’s small corrections for weather, detector growth and Earth’s magnetic field.</p></div>
   </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="label">In one breath</span>
+    <h2>The whole project in three sentences</h2>
+  </div>
+  <p class="quote">I tested two ideas about where the most energetic particles in the universe come from. Near Centaurus A I found 13 particles where chance predicts 11, which could easily be luck. Across the whole sky I found about 6% more particles from one side, matching what Auger discovered in 2017, but with a tenth of their data my result alone isn’t strong enough to prove it.</p>
 </section>
 
 <section>
