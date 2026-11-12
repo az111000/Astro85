@@ -1,0 +1,551 @@
+<title>Highest-Energy Cosmic Rays</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column of numbered steps; each step pairs a short explanation with a live instrument (sky map or chart) and its controls. */
+:root {
+  --bg: #EDF0F4;
+  --surface: #FFFFFF;
+  --map: #F6F8FB;
+  --ink: #142033;
+  --ink-soft: #4A5568;
+  --line: #D3DAE4;
+  --grid: #C9D1DD;
+  --dot: #8C96A8;
+  --accent: #C4521D;
+  --accent-soft: #F6D9C9;
+  --blue: #2766C2;
+  --blue-soft: #D6E4F7;
+  --font-text: 'IBM Plex Sans', 'Segoe UI', Arial, sans-serif;
+  --font-data: 'IBM Plex Mono', 'Courier New', monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0B1220; --surface: #121B2D; --map: #0F1829; --ink: #E6EBF2; --ink-soft: #A3AFC2;
+    --line: #26324A; --grid: #2C3A55; --dot: #6F7D96; --accent: #F08A5D; --accent-soft: #4A2A1C;
+    --blue: #6AA4F2; --blue-soft: #1B2D4A; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0B1220; --surface: #121B2D; --map: #0F1829; --ink: #E6EBF2; --ink-soft: #A3AFC2;
+  --line: #26324A; --grid: #2C3A55; --dot: #6F7D96; --accent: #F08A5D; --accent-soft: #4A2A1C;
+  --blue: #6AA4F2; --blue-soft: #1B2D4A; color-scheme: dark;
+}
+
+body { background: var(--bg); color: var(--ink); font-family: var(--font-text); font-size: 17px; line-height: 1.6; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-block: 48px 72px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 56px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(32px, 5vw, 52px); font-weight: 700; letter-spacing: -0.5px; }
+h2 { font-size: clamp(24px, 3vw, 32px); font-weight: 600; }
+h3 { font-size: 19px; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+a { color: var(--blue); }
+.label { font-family: var(--font-data); font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); }
+.soft { color: var(--ink-soft); }
+.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+
+header { display: flex; flex-direction: column; gap: 18px; }
+.lede { font-size: 19px; color: var(--ink-soft); }
+
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; }
+.tile .big { font-family: var(--font-data); font-size: 30px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.tile .big.hot { color: var(--accent); }
+.tile p { font-size: 15px; color: var(--ink-soft); }
+
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; counter-reset: step; }
+.step { border-top: 3px solid var(--ink); padding-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.step p { font-size: 15.5px; color: var(--ink-soft); }
+.step .label { color: var(--ink-soft); }
+
+section { display: flex; flex-direction: column; gap: 20px; }
+.sec-head { display: flex; flex-direction: column; gap: 10px; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: end; }
+.ctl { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ctl label { font-size: 14px; font-weight: 500; color: var(--ink-soft); }
+.ctl .val { font-family: var(--font-data); color: var(--ink); }
+input[type=range] { width: 240px; max-width: 100%; accent-color: var(--accent); }
+select, button { font: inherit; font-size: 15px; color: var(--ink); background: var(--map); border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; }
+button { cursor: pointer; font-weight: 500; }
+button:hover { border-color: var(--accent); }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+.mapbox { position: relative; width: 100%; }
+canvas { display: block; width: 100%; height: auto; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 13px; line-height: 1.45; box-shadow: 0 4px 14px rgba(0,0,0,.15); white-space: nowrap; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; color: var(--ink-soft); }
+.key { display: inline-flex; align-items: center; gap: 7px; }
+.sw { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+
+.two { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; }
+.readout { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.readout div { border-left: 3px solid var(--line); padding-left: 12px; }
+.readout .k { font-size: 13px; color: var(--ink-soft); }
+.readout .v { font-family: var(--font-data); font-size: 24px; font-variant-numeric: tabular-nums; }
+.verdict { font-size: 16px; padding: 10px 14px; border-radius: 8px; background: var(--blue-soft); }
+.verdict.sig { background: var(--accent-soft); }
+.note { font-size: 14.5px; color: var(--ink-soft); }
+svg text { font-family: var(--font-data); font-size: 12px; fill: var(--ink-soft); }
+
+.colorbar { display: flex; align-items: center; gap: 10px; font-family: var(--font-data); font-size: 13px; color: var(--ink-soft); }
+.colorbar .bar { height: 10px; width: 220px; max-width: 50vw; border-radius: 5px; }
+
+.findings { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.finding { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
+.finding p { font-size: 15.5px; color: var(--ink-soft); }
+ul.sources { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; color: var(--ink-soft); max-width: 80ch; }
+
+@media (max-width: 760px) {
+  .tiles, .steps, .findings, .two { grid-template-columns: minmax(0, 1fr); }
+  .readout { grid-template-columns: minmax(0, 1fr); }
+  .readout .v { font-size: 20px; }
+}
+</style>
+
+<div class="wrap">
+
+<header>
+  <span class="label">CS85 · Project 20 · Pierre Auger Observatory open data</span>
+  <h1>Where do the highest-energy particles come from?</h1>
+  <p class="lede">Cosmic rays are atomic nuclei that hit Earth from space. The most energetic ones carry as much energy as a thrown baseball, packed into a single particle, and nobody knows for sure what accelerates them. If they come from particular galaxies, their arrival directions should pile up in particular spots on the sky. This page tests that with real data.</p>
+  <div class="tiles">
+    <div class="tile"><span class="big">109</span><p>highest-energy events Auger recorded, 2004–2020 (46–166 EeV)</p></div>
+    <div class="tile"><span class="big">p ≈ 0.31</span><p>Centaurus A test: 13 events within 25°, where chance gives 11.2. Not significant.</p></div>
+    <div class="tile"><span class="big hot">5.8% ± 2.8%</span><p>one-sided “dipole” above 8 EeV, close to Auger’s published 4.7%, chance probability 12%</p></div>
+  </div>
+</header>
+
+<section>
+  <div class="sec-head">
+    <span class="label">What was done</span>
+    <h2>Three steps, from a starter plot to two statistical tests</h2>
+  </div>
+  <div class="steps">
+    <div class="step"><span class="label">Step 1 · starter</span><h3>Plot where the particles came from</h3><p>The starter script <span class="num">20_cosmic_ray_skymap.py</span> downloads Auger’s catalog of its 109 most energetic events and plots each arrival direction on a map of the whole sky, sized by energy.</p></div>
+    <div class="step"><span class="label">Step 2 · prototype</span><h3>Test for a pile-up near Centaurus A</h3><p>Count events within 25° of Centaurus A, then compare with 1,000 shuffled skies that keep Auger’s view of the sky but contain no sources.</p></div>
+    <div class="step"><span class="label">Step 3 · stretch</span><h3>Look for a lopsided sky above 8 EeV</h3><p>Download Auger’s larger public dataset (2,465 events above 8 EeV) and measure whether more particles arrive from one side.</p></div>
+  </div>
+</section>
+
+<section id="sky">
+  <div class="sec-head">
+    <span class="label">Step 1 · The starter’s sky map</span>
+    <h2>Where the 109 top particles came from</h2>
+    <p class="soft">The whole sky is flattened into an oval, in Galactic coordinates: the Milky Way runs along the middle line and its centre is in the middle. Each dot is one particle. Hover or tap a dot to see it. The emptier upper left is northern sky that Auger, in Argentina, can barely see.</p>
+  </div>
+  <div class="panel">
+    <div class="mapbox" id="skyBox"><canvas id="skyCanvas" aria-label="Sky map of 109 cosmic-ray arrival directions in Galactic coordinates"></canvas><div class="tip" id="skyTip" hidden></div></div>
+    <div class="legend">
+      <span class="key"><span class="sw" style="background:var(--dot)"></span>event (bigger = more energetic)</span>
+      <span class="key"><span class="sw" style="background:var(--accent)"></span>inside the test circle (Step 2)</span>
+      <span class="key"><span class="sw" style="background:var(--blue);border-radius:2px"></span>Centaurus A, Amaterasu and Oh-My-God directions</span>
+    </div>
+  </div>
+</section>
+
+<section id="cena">
+  <div class="sec-head">
+    <span class="label">Step 2 · Thursday prototype</span>
+    <h2>Is the bunch around Centaurus A real, or luck?</h2>
+    <p class="soft">Auger doesn’t see the whole sky equally: it mostly sees the south. But the Earth spins, so every east–west direction (right ascension) gets the same viewing time. A fair “no sources” sky keeps each event’s north–south position (declination) and gives it a random right ascension. The p-value is the share of those shuffled skies with at least as many events in the circle as the real sky.</p>
+  </div>
+  <div class="panel">
+    <div class="controls">
+      <div class="ctl"><label for="target">Look around</label>
+        <select id="target">
+          <option value="cena">Centaurus A (nearby active galaxy)</option>
+          <option value="gc">Galactic centre</option>
+          <option value="ama">Amaterasu direction</option>
+          <option value="omg">Oh-My-God direction</option>
+        </select></div>
+      <div class="ctl"><label for="radius">Circle radius: <span class="val" id="radiusVal">25°</span></label>
+        <input type="range" id="radius" min="5" max="60" step="1" value="25"></div>
+      <div class="ctl"><button id="reshuffle" type="button">Make 1,000 new shuffled skies</button></div>
+    </div>
+    <div class="readout">
+      <div><div class="k">Real sky</div><div class="v" id="obs">–</div></div>
+      <div><div class="k">Average shuffled sky</div><div class="v" id="exp">–</div></div>
+      <div><div class="k">p-value</div><div class="v" id="pval">–</div></div>
+    </div>
+    <svg id="hist" viewBox="0 0 900 300" role="img" aria-label="Histogram of event counts in shuffled skies with the real count marked"></svg>
+    <p class="verdict" id="verdict"></p>
+    <p class="note"><b>A warning about the slider.</b> If you try many circle sizes and report only the best one, you will fool yourself. This is called the look-elsewhere effect. The fair answer is the one chosen before looking: 25° around Centaurus A gives p ≈ 0.31 in the Python analysis. Across every radius from 5° to 60°, the smallest p is about 0.11, still not significant.</p>
+  </div>
+</section>
+
+<section id="dipole">
+  <div class="sec-head">
+    <span class="label">Step 3 · Stretch goal</span>
+    <h2>Do more particles arrive from one side of the sky?</h2>
+    <p class="soft">In 2017 Auger announced that, above 8 EeV, about 6% more particles arrive from one direction than from the opposite one, pointing away from our galaxy’s centre. Here the same test runs on Auger’s public dataset, about a tenth of their events. We count events in each 30° slice of right ascension and fit a wave, <span class="num">1 + r·cos(RA − phase)</span>. The chance of a wave this big from a smooth sky is <span class="num">P = exp(−N r²/4)</span>.</p>
+  </div>
+  <div class="panel">
+    <div class="controls">
+      <div class="ctl"><label for="emin">Energy cutoff: <span class="val" id="eminVal">8 EeV</span></label>
+        <input type="range" id="emin" min="4" max="32" step="1" value="8"></div>
+    </div>
+    <div class="readout">
+      <div><div class="k">Events above cutoff</div><div class="v" id="dN">–</div></div>
+      <div><div class="k">Wave size r · phase</div><div class="v" id="dR">–</div></div>
+      <div><div class="k">Chance probability P</div><div class="v" id="dP">–</div></div>
+    </div>
+    <div class="two">
+      <div style="min-width:0;display:flex;flex-direction:column;gap:10px">
+        <h3>Smoothed sky: excess over a smooth sky</h3>
+        <div class="mapbox" id="dipBox"><canvas id="dipCanvas" aria-label="Smoothed sky map of the cosmic-ray excess above the chosen energy"></canvas></div>
+        <div class="colorbar"><span>−15%</span><span class="bar" id="cbar"></span><span>+15%</span></div>
+        <p class="note">Each spot counts events within 45° and compares with a smooth sky that has Auger’s coverage. + is the Galactic centre, ✕ is the dipole direction Auger published. Blank areas are sky Auger sees too little of.</p>
+      </div>
+      <div style="min-width:0;display:flex;flex-direction:column;gap:10px">
+        <h3>Event rate by right ascension</h3>
+        <svg id="raPlot" viewBox="0 0 460 330" role="img" aria-label="Event rate in 30 degree right ascension bins with fitted wave"></svg>
+        <div class="legend">
+          <span class="key"><span class="sw" style="background:var(--ink)"></span>data, with error bars</span>
+          <span class="key"><span class="sw" style="background:var(--accent)"></span>fitted wave</span>
+          <span class="key"><span class="sw" style="background:var(--blue)"></span>Auger 2017, ≥ 8 EeV (dashed)</span>
+        </div>
+      </div>
+    </div>
+    <p class="verdict" id="dVerdict"></p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="label">What I found</span>
+    <h2>Hints pointing the right way, but not enough data to be sure</h2>
+  </div>
+  <div class="findings">
+    <div class="finding"><h3>Centaurus A</h3><p>13 events within 25°, where chance gives 11.2, so p ≈ 0.31. With only 109 events, a small excess like this is easily luck.</p></div>
+    <div class="finding"><h3>Dipole above 8 EeV</h3><p>A 5.8% ± 2.8% wave at right ascension 144°, matching Auger’s 4.7% within the errors. On its own it has a 12% chance of being noise.</p></div>
+    <div class="finding"><h3>What would settle it</h3><p>About ten times more events. Auger’s full dataset shows the dipole at 5.2σ. This analysis skips Auger’s small corrections for weather, detector growth and Earth’s magnetic field.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="label">Data and code</span><h2>Sources</h2></div>
+  <ul class="sources">
+    <li>Pierre Auger Collaboration, catalog of the highest-energy cosmic rays 2004–2020, <a href="https://opendata.auger.org/catalog/" target="_blank" rel="noopener">opendata.auger.org/catalog</a> (Abreu et al. 2023, ApJS 264, 50).</li>
+    <li>Pierre Auger Observatory public data release, SD1500 events (<span class="num">auger3.ev_sd1500</span>), via GAVO’s TAP service at <a href="https://dc.g-vo.org/tap" target="_blank" rel="noopener">dc.g-vo.org/tap</a>.</li>
+    <li>Pierre Auger Collaboration 2017, “Observation of a large-scale anisotropy in the arrival directions of cosmic rays above 8 × 10¹⁸ eV,” Science 357, 1266. Source of the 4.7% / 100° comparison and the dipole direction (l, b) ≈ (233°, −13°).</li>
+    <li>Code: <span class="num">starters/20_cosmic_ray_skymap.py</span> and the <span class="num">project20/</span> folder of the course repository. Every number on this page is computed from the real data embedded in it; nothing is simulated except the shuffled skies, which are the test itself.</li>
+  </ul>
+</section>
+
+</div>
+
+<script>
+const DATA = __DATA__;
+
+// ---------- helpers ----------
+const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function hexToRgb(h) { h = h.replace('#', ''); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); }
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const fmt = (x, d = 2) => x.toFixed(d);
+
+// ICRS -> Galactic rotation (J2000), checked against astropy
+const M = [[-0.0548755604, -0.8734370902, -0.4838350155], [0.4941094279, -0.4448296300, 0.7469822445], [-0.8676661490, -0.1980763734, 0.4559837762]];
+function eqToGal(ra, dec) {
+  const r = ra * D2R, d = dec * D2R, e = [Math.cos(d) * Math.cos(r), Math.cos(d) * Math.sin(r), Math.sin(d)];
+  const g = M.map(row => row[0] * e[0] + row[1] * e[1] + row[2] * e[2]);
+  return [((Math.atan2(g[1], g[0]) * R2D) + 360) % 360, Math.asin(g[2]) * R2D];
+}
+function galToEq(l, b) {
+  const L = l * D2R, B = b * D2R, g = [Math.cos(B) * Math.cos(L), Math.cos(B) * Math.sin(L), Math.sin(B)];
+  const e = [0, 1, 2].map(j => M[0][j] * g[0] + M[1][j] * g[1] + M[2][j] * g[2]);
+  return [((Math.atan2(e[1], e[0]) * R2D) + 360) % 360, Math.asin(Math.max(-1, Math.min(1, e[2]))) * R2D];
+}
+function offset(ra, dec, bearing, dist) {   // point at angular distance dist (deg) along bearing from (ra, dec)
+  const d = dec * D2R, r = ra * D2R, t = bearing * D2R, s = dist * D2R;
+  const d2 = Math.asin(Math.sin(d) * Math.cos(s) + Math.cos(d) * Math.sin(s) * Math.cos(t));
+  const r2 = r + Math.atan2(Math.sin(t) * Math.sin(s) * Math.cos(d), Math.cos(s) - Math.sin(d) * Math.sin(d2));
+  return [r2 * R2D, d2 * R2D];
+}
+
+// ---------- Mollweide projection (Galactic, longitude increasing to the left) ----------
+function project(l, b, W) {
+  let lam = ((l + 180) % 360 + 360) % 360 - 180; lam = -lam * D2R;
+  const phi = b * D2R; let th = phi;
+  if (Math.abs(phi) > 1.5707) th = Math.sign(phi) * Math.PI / 2;
+  else for (let i = 0; i < 20; i++) { const f = 2 * th + Math.sin(2 * th) - Math.PI * Math.sin(phi); th -= f / (2 + 2 * Math.cos(2 * th)); }
+  const x = 2 * Math.SQRT2 / Math.PI * lam * Math.cos(th), y = Math.SQRT2 * Math.sin(th);
+  const H = W / 2;
+  return [W / 2 + x / (2 * Math.SQRT2) * (W / 2), H / 2 - y / Math.SQRT2 * (H / 2)];
+}
+function unproject(px, py, W) {
+  const H = W / 2, x = (px - W / 2) / (W / 2) * 2 * Math.SQRT2, y = (H / 2 - py) / (H / 2) * Math.SQRT2;
+  if (x * x / 8 + y * y / 2 > 1) return null;
+  const th = Math.asin(y / Math.SQRT2);
+  const phi = Math.asin((2 * th + Math.sin(2 * th)) / Math.PI);
+  const lam = Math.PI * x / (2 * Math.SQRT2 * Math.cos(th));
+  return [((-lam * R2D) % 360 + 360) % 360, phi * R2D];
+}
+function setupCanvas(canvas, box) {
+  const W = box.clientWidth, H = W / 2, dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, W, H };
+}
+function drawFrame(ctx, W, fillMap) {
+  const H = W / 2;
+  ctx.beginPath(); ctx.ellipse(W / 2, H / 2, W / 2 - 1, H / 2 - 1, 0, 0, 2 * Math.PI);
+  if (fillMap) { ctx.fillStyle = css('--map'); ctx.fill(); }
+}
+function drawGrid(ctx, W) {
+  const H = W / 2; ctx.strokeStyle = css('--grid'); ctx.lineWidth = 1;
+  for (let b = -60; b <= 60; b += 30) { ctx.beginPath(); for (let l = -180; l <= 180; l += 3) { const [x, y] = project(l, b, W); l === -180 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.stroke(); }
+  for (let l = 0; l < 360; l += 60) { ctx.beginPath(); for (let b = -90; b <= 90; b += 3) { const [x, y] = project(l === 180 ? 179.999 : l, b, W); b === -90 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.stroke(); }
+  ctx.beginPath(); ctx.ellipse(W / 2, H / 2, W / 2 - 1, H / 2 - 1, 0, 0, 2 * Math.PI); ctx.strokeStyle = css('--ink-soft'); ctx.stroke();
+  ctx.fillStyle = css('--ink-soft'); ctx.font = `${W < 500 ? 10 : 12}px ${css('--font-data')}`; ctx.textAlign = 'center';
+  for (const l of [0, 60, 120, 240, 300]) { const [x, y] = project(l, 0, W); ctx.fillText(l + '°', x, y - 5); }
+}
+function drawMarker(ctx, W, l, b, kind, label) {
+  const [x, y] = project(l, b, W); const s = W < 500 ? 6 : 8;
+  ctx.lineWidth = 2.5; ctx.strokeStyle = css('--ink'); ctx.fillStyle = css('--blue');
+  if (kind === 'plus') { ctx.beginPath(); ctx.moveTo(x - s, y); ctx.lineTo(x + s, y); ctx.moveTo(x, y - s); ctx.lineTo(x, y + s); ctx.stroke(); }
+  else if (kind === 'x') { ctx.beginPath(); ctx.moveTo(x - s, y - s); ctx.lineTo(x + s, y + s); ctx.moveTo(x + s, y - s); ctx.lineTo(x - s, y + s); ctx.stroke(); }
+  else { ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4); ctx.fillRect(-s * 0.7, -s * 0.7, s * 1.4, s * 1.4); ctx.strokeStyle = css('--surface'); ctx.lineWidth = 1.5; ctx.strokeRect(-s * 0.7, -s * 0.7, s * 1.4, s * 1.4); ctx.restore(); }
+  if (label) { ctx.fillStyle = css('--ink'); ctx.font = `600 ${W < 500 ? 10 : 12}px ${css('--font-text')}`; ctx.textAlign = 'left'; ctx.fillText(label, x + s + 4, y + 4); }
+}
+
+// ---------- Step 1 + 2 data ----------
+const EV = DATA.top;   // {ra, dec, l, b, e, t}
+const N = EV.ra.length;
+const sinD = EV.dec.map(d => Math.sin(d * D2R)), cosD = EV.dec.map(d => Math.cos(d * D2R));
+const TARGETS = {
+  cena: { name: 'Centaurus A', ra: 201.37, dec: -43.02 },
+  gc: { name: 'Galactic centre', ra: 266.405, dec: -28.936 },
+  ama: { name: 'Amaterasu', ra: 255.9, dec: 16.1 },
+  omg: { name: 'Oh-My-God', ra: 85.2, dec: 48.0 },
+};
+const FAMOUS = ['cena', 'ama', 'omg'];
+const N_SKIES = 1000;
+let seed = 85, fakeRA = null;
+function makeSkies() {
+  const rnd = mulberry32(seed); fakeRA = new Float32Array(N_SKIES * N);
+  for (let i = 0; i < fakeRA.length; i++) fakeRA[i] = rnd() * 2 * Math.PI;
+}
+function cosSepTo(raRad, i, t) { return sinD[i] * Math.sin(t.dec * D2R) + cosD[i] * Math.cos(t.dec * D2R) * Math.cos(raRad - t.ra * D2R); }
+
+const state = { target: 'cena', radius: 25 };
+let inside = new Array(N).fill(false), skyPts = [];
+
+function runTest() {
+  const t = TARGETS[state.target], c = Math.cos(state.radius * D2R);
+  let obs = 0;
+  for (let i = 0; i < N; i++) { inside[i] = cosSepTo(EV.ra[i] * D2R, i, t) > c; if (inside[i]) obs++; }
+  const counts = new Int32Array(N_SKIES);
+  for (let s = 0; s < N_SKIES; s++) { let n = 0; for (let i = 0; i < N; i++) if (cosSepTo(fakeRA[s * N + i], i, t) > c) n++; counts[s] = n; }
+  let sum = 0, ge = 0; for (const n of counts) { sum += n; if (n >= obs) ge++; }
+  const mean = sum / N_SKIES, p = (ge + 1) / (N_SKIES + 1);
+  document.getElementById('obs').textContent = obs;
+  document.getElementById('exp').textContent = fmt(mean, 1);
+  document.getElementById('pval').textContent = p < 0.001 ? '< 0.001' : fmt(p, 3);
+  const v = document.getElementById('verdict');
+  v.classList.toggle('sig', p < 0.01);
+  v.innerHTML = `${ge.toLocaleString()} of ${N_SKIES.toLocaleString()} shuffled skies had ${obs} or more events within ${state.radius}° of ${t.name}. ` +
+    (p < 0.01 ? '<b>That rarely happens by chance</b> (but see the warning below if you tuned the slider).' :
+      p < 0.05 ? '<b>Somewhat unusual, but not convincing</b>, especially after trying several circle sizes.' :
+        '<b>This is consistent with chance.</b>');
+  drawHist(counts, obs, mean);
+  drawSky();
+}
+
+function drawHist(counts, obs, mean) {
+  const svg = document.getElementById('hist'), W = 900, H = 300, m = { l: 56, r: 20, t: 16, b: 44 };
+  let maxC = obs; for (const n of counts) maxC = Math.max(maxC, n);
+  const bins = new Array(maxC + 1).fill(0); for (const n of counts) bins[n]++;
+  const ymax = Math.max(...bins) * 1.1;
+  const x = v => m.l + (v + 0.5) / (maxC + 1) * (W - m.l - m.r), y = v => H - m.b - v / ymax * (H - m.t - m.b);
+  const bw = Math.max(1, (W - m.l - m.r) / (maxC + 1) - 3);
+  const blue = css('--blue'), acc = css('--accent'), soft = css('--ink-soft'), grid = css('--grid');
+  let s = '';
+  const step = ymax > 200 ? 50 : ymax > 80 ? 20 : 10;
+  for (let v = 0; v < ymax; v += step) s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="${grid}" stroke-width="1"/><text x="${m.l - 8}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  bins.forEach((n, k) => { if (n) s += `<rect x="${x(k) - bw / 2}" y="${y(n)}" width="${bw}" height="${y(0) - y(n)}" rx="2" fill="${blue}"><title>${n} skies had ${k} events</title></rect>`; });
+  const tick = maxC > 40 ? 10 : 5;
+  for (let k = 0; k <= maxC; k += tick) s += `<text x="${x(k)}" y="${H - m.b + 18}" text-anchor="middle">${k}</text>`;
+  s += `<line x1="${x(mean)}" x2="${x(mean)}" y1="${m.t}" y2="${y(0)}" stroke="${soft}" stroke-dasharray="4 4"/>`;
+  s += `<line x1="${x(obs)}" x2="${x(obs)}" y1="${m.t}" y2="${y(0)}" stroke="${acc}" stroke-width="3"/>`;
+  const right = x(obs) < W - 170;
+  s += `<text x="${x(obs) + (right ? 8 : -8)}" y="${m.t + 14}" text-anchor="${right ? 'start' : 'end'}" style="fill:${acc};font-weight:500">real sky: ${obs}</text>`;
+  s += `<text x="${(W + m.l) / 2}" y="${H - 6}" text-anchor="middle">events inside the circle, in each of ${N_SKIES.toLocaleString()} shuffled skies</text>`;
+  s += `<text transform="translate(14 ${(H - m.b + m.t) / 2}) rotate(-90)" text-anchor="middle">number of skies</text>`;
+  svg.innerHTML = s;
+}
+
+function drawSky() {
+  const canvas = document.getElementById('skyCanvas'), box = document.getElementById('skyBox');
+  const { ctx, W } = setupCanvas(canvas, box);
+  drawFrame(ctx, W, true); drawGrid(ctx, W);
+  // test circle
+  const t = TARGETS[state.target];
+  ctx.strokeStyle = css('--accent'); ctx.lineWidth = 2; ctx.beginPath();
+  let prev = null;
+  for (let a = 0; a <= 360; a += 2) {
+    const [r, d] = offset(t.ra, t.dec, a, state.radius), [l, b] = eqToGal(r, d), [x, y] = project(l, b, W);
+    if (prev && Math.abs(x - prev[0]) > W / 3) ctx.moveTo(x, y); else if (!prev) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    prev = [x, y];
+  }
+  ctx.stroke();
+  // events
+  skyPts = [];
+  const order = [...Array(N).keys()].sort((a, b) => inside[a] - inside[b]);
+  const k = W / 900;
+  for (const i of order) {
+    const [x, y] = project(EV.l[i], EV.b[i], W), r = Math.max(2.5, (EV.e[i] - 30) / 14 * k * 1.6);
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI);
+    ctx.fillStyle = inside[i] ? css('--accent') : css('--dot'); ctx.globalAlpha = inside[i] ? 1 : 0.8; ctx.fill();
+    ctx.globalAlpha = 1; ctx.strokeStyle = css('--map'); ctx.lineWidth = 1; ctx.stroke();
+    skyPts.push({ i, x, y, r });
+  }
+  for (const key of FAMOUS) { const f = TARGETS[key], [l, b] = eqToGal(f.ra, f.dec); drawMarker(ctx, W, l, b, 'diamond', f.name); }
+  if (state.target === 'gc') { drawMarker(ctx, W, 0, 0, 'plus', 'Galactic centre'); }
+}
+
+// hover tooltip on the sky map
+(function () {
+  const box = document.getElementById('skyBox'), tip = document.getElementById('skyTip');
+  function show(ev) {
+    const rect = box.getBoundingClientRect(), px = ev.clientX - rect.left, py = ev.clientY - rect.top;
+    let best = null, bd = 1e9;
+    for (const p of skyPts) { const d = Math.hypot(p.x - px, p.y - py); if (d < Math.max(10, p.r + 4) && d < bd) { bd = d; best = p; } }
+    if (!best) { tip.hidden = true; return; }
+    const i = best.i, date = new Date(EV.t[i] * 1000).toISOString().slice(0, 10);
+    tip.innerHTML = `<b>${EV.e[i]} EeV</b> · ${date}<br><span class="num">l = ${fmt(EV.l[i], 1)}°, b = ${fmt(EV.b[i], 1)}°</span><br><span class="num">RA ${fmt(EV.ra[i], 1)}°, Dec ${fmt(EV.dec[i], 1)}°</span>`;
+    tip.hidden = false;
+    const tw = tip.offsetWidth; let left = best.x + 12; if (left + tw > box.clientWidth) left = best.x - tw - 12;
+    tip.style.left = Math.max(0, left) + 'px'; tip.style.top = Math.max(0, best.y - 20) + 'px';
+  }
+  box.addEventListener('pointermove', show); box.addEventListener('pointerdown', show);
+  box.addEventListener('pointerleave', () => tip.hidden = true);
+})();
+
+// ---------- Step 3: dipole ----------
+const BIG = DATA.big;   // {ra, dec, e}
+const AUGER = { r: 0.047, phase: 100, l: 233, b: -13 };
+const GSTEP = 3, GL = 360 / GSTEP, GB = 180 / GSTEP + 1;
+const grid = [];   // grid points in Galactic coords with their RA/Dec
+for (let j = 0; j < GB; j++) for (let i = 0; i < GL; i++) { const l = i * GSTEP, b = -90 + j * GSTEP, [ra, dec] = galToEq(l, b); grid.push({ sd: Math.sin(dec * D2R), cd: Math.cos(dec * D2R), ra: ra * D2R }); }
+
+function rayleigh(ras) {
+  let A = 0, B = 0; for (const r of ras) { A += Math.cos(r * D2R); B += Math.sin(r * D2R); }
+  const n = ras.length; A *= 2 / n; B *= 2 / n;
+  const r = Math.hypot(A, B);
+  return { n, r, phase: ((Math.atan2(B, A) * R2D) + 360) % 360, P: Math.exp(-n * r * r / 4), sigma: Math.sqrt(2 / n) };
+}
+
+let excess = null;
+function computeMap(sel) {
+  const SM = Math.cos(45 * D2R), n = sel.length;
+  const er = new Float64Array(n), esd = new Float64Array(n), ecd = new Float64Array(n);
+  sel.forEach((k, m) => { er[m] = BIG.ra[k] * D2R; esd[m] = Math.sin(BIG.dec[k] * D2R); ecd[m] = Math.cos(BIG.dec[k] * D2R); });
+  const obs = new Float64Array(grid.length), exp = new Float64Array(grid.length);
+  for (let g = 0; g < grid.length; g++) {
+    const p = grid[g]; let o = 0, e = 0;
+    for (let m = 0; m < n; m++) {
+      const a = esd[m] * p.sd, bb = ecd[m] * p.cd;
+      if (a + bb * Math.cos(er[m] - p.ra) > SM) o++;
+      // expected: share of a full turn in RA that falls within 45 deg (exact average over shuffled RAs)
+      if (bb < 1e-9) { if (a > SM) e += 1; continue; }
+      const c = (SM - a) / bb;
+      e += c >= 1 ? 0 : c <= -1 ? 1 : Math.acos(c) / Math.PI;
+    }
+    obs[g] = o; exp[g] = e;
+  }
+  let emax = 0; for (const e of exp) emax = Math.max(emax, e);
+  excess = new Float64Array(grid.length);
+  for (let g = 0; g < grid.length; g++) excess[g] = exp[g] > 0.3 * emax ? obs[g] / exp[g] - 1 : NaN;
+}
+function divColor(v, neg, mid, pos) {
+  const t = Math.max(-1, Math.min(1, v / 0.15)), a = t < 0 ? neg : pos, f = Math.abs(t);
+  return [0, 1, 2].map(k => Math.round(mid[k] + (a[k] - mid[k]) * f));
+}
+function drawDipoleMap() {
+  const canvas = document.getElementById('dipCanvas'), box = document.getElementById('dipBox');
+  const { ctx, W, H } = setupCanvas(canvas, box);
+  const neg = hexToRgb(css('--blue')), pos = hexToRgb(css('--accent')), mid = hexToRgb(css('--map'));
+  const res = Math.max(1, Math.round(W / 360));   // coarse pixels for speed
+  const w = Math.ceil(W / res), h = Math.ceil(H / res), img = new ImageData(w, h);
+  for (let py = 0; py < h; py++) for (let px = 0; px < w; px++) {
+    const q = unproject((px + 0.5) * res, (py + 0.5) * res, W); if (!q) continue;
+    const fi = q[0] / GSTEP, fj = (q[1] + 90) / GSTEP, i0 = Math.floor(fi), j0 = Math.min(GB - 2, Math.floor(fj)), di = fi - i0, dj = fj - j0;
+    const at = (i, j) => excess[j * GL + ((i % GL) + GL) % GL];
+    const v00 = at(i0, j0), v10 = at(i0 + 1, j0), v01 = at(i0, j0 + 1), v11 = at(i0 + 1, j0 + 1);
+    let v = (1 - di) * (1 - dj) * v00 + di * (1 - dj) * v10 + (1 - di) * dj * v01 + di * dj * v11;
+    if (Number.isNaN(v)) { v = at(Math.round(fi), Math.round(fj)); if (Number.isNaN(v)) continue; }
+    const c = divColor(v, neg, mid, pos), o = (py * w + px) * 4;
+    img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2]; img.data[o + 3] = 255;
+  }
+  const off = document.createElement('canvas'); off.width = w; off.height = h; off.getContext('2d').putImageData(img, 0, 0);
+  ctx.save(); drawFrame(ctx, W, false); ctx.clip(); ctx.imageSmoothingEnabled = true; ctx.drawImage(off, 0, 0, W, H); ctx.restore();
+  drawGrid(ctx, W);
+  drawMarker(ctx, W, 0, 0, 'plus', null);
+  drawMarker(ctx, W, AUGER.l, AUGER.b, 'x', null);
+  document.getElementById('cbar').style.background = `linear-gradient(90deg, ${css('--blue')}, ${css('--map')}, ${css('--accent')})`;
+}
+
+function drawRA(ras, res) {
+  const svg = document.getElementById('raPlot'), W = 460, H = 330, m = { l: 52, r: 14, t: 14, b: 46 };
+  const counts = new Array(12).fill(0); for (const r of ras) counts[Math.min(11, Math.floor(((r % 360) + 360) % 360 / 30))]++;
+  const mean = ras.length / 12;
+  const vals = counts.map(c => c / mean), errs = counts.map(c => Math.sqrt(c) / mean);
+  let lo = 1, hi = 1; vals.forEach((v, k) => { lo = Math.min(lo, v - errs[k]); hi = Math.max(hi, v + errs[k]); });
+  lo = Math.min(lo, 1 - res.r, 0.94) - 0.02; hi = Math.max(hi, 1 + res.r, 1.06) + 0.02;
+  const x = v => m.l + v / 360 * (W - m.l - m.r), y = v => H - m.b - (v - lo) / (hi - lo) * (H - m.t - m.b);
+  const acc = css('--accent'), blue = css('--blue'), ink = css('--ink'), grid = css('--grid');
+  let s = '';
+  const span = hi - lo, step = span > 0.8 ? 0.2 : span > 0.4 ? 0.1 : 0.05;
+  for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="${grid}"/><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${v.toFixed(2)}</text>`;
+  for (let a = 0; a <= 360; a += 60) s += `<text x="${x(a)}" y="${H - m.b + 18}" text-anchor="middle">${a}°</text>`;
+  const curve = (r, ph) => { let d = ''; for (let a = 0; a <= 360; a += 4) d += (a ? 'L' : 'M') + x(a).toFixed(1) + ' ' + y(1 + r * Math.cos((a - ph) * D2R)).toFixed(1); return d; };
+  s += `<path d="${curve(AUGER.r, AUGER.phase)}" fill="none" stroke="${blue}" stroke-width="2" stroke-dasharray="6 5"/>`;
+  s += `<path d="${curve(res.r, res.phase)}" fill="none" stroke="${acc}" stroke-width="2.5"/>`;
+  vals.forEach((v, k) => {
+    const cx = x(k * 30 + 15);
+    s += `<line x1="${cx}" x2="${cx}" y1="${y(v - errs[k])}" y2="${y(v + errs[k])}" stroke="${ink}" stroke-width="1.5"/>`;
+    s += `<circle cx="${cx}" cy="${y(v)}" r="4.5" fill="${ink}"><title>RA ${k * 30}–${k * 30 + 30}°: ${counts[k]} events (${((v - 1) * 100).toFixed(1)}% vs average)</title></circle>`;
+  });
+  s += `<text x="${(W + m.l) / 2}" y="${H - 8}" text-anchor="middle">right ascension</text>`;
+  s += `<text transform="translate(13 ${(H - m.b + m.t) / 2}) rotate(-90)" text-anchor="middle">rate vs average</text>`;
+  svg.innerHTML = s;
+}
+
+function runDipole() {
+  const emin = +document.getElementById('emin').value;
+  document.getElementById('eminVal').textContent = emin + ' EeV';
+  const sel = []; for (let k = 0; k < BIG.e.length; k++) if (BIG.e[k] >= emin) sel.push(k);
+  const ras = sel.map(k => BIG.ra[k]), res = rayleigh(ras);
+  document.getElementById('dN').textContent = res.n.toLocaleString();
+  document.getElementById('dR').textContent = `${fmt(res.r * 100, 1)}% · ${Math.round(res.phase)}°`;
+  document.getElementById('dP').textContent = res.P < 0.001 ? res.P.toExponential(1) : fmt(res.P, 2);
+  const v = document.getElementById('dVerdict');
+  v.classList.toggle('sig', res.P < 0.003);
+  v.innerHTML = `Wave size ${fmt(res.r * 100, 1)}% ± ${fmt(res.sigma * 100, 1)}% (noise alone gives about ±${fmt(res.sigma * 100, 1)}% with ${res.n.toLocaleString()} events). ` +
+    (res.P < 0.003 ? '<b>Unlikely to be noise.</b>' : res.P < 0.05 ? '<b>Suggestive, not convincing.</b>' : `<b>A smooth sky gives a wave this big ${Math.round(res.P * 100)}% of the time</b>, so on its own this isn’t a detection.`) +
+    (emin === 8 ? ' Auger’s full dataset (32,187 events) gives 4.7% at 100°, a 5.2σ detection.' : '');
+  drawRA(ras, res);
+  computeMap(sel);
+  drawDipoleMap();
+}
+
+// ---------- wiring ----------
+document.getElementById('target').addEventListener('change', e => { state.target = e.target.value; runTest(); });
+document.getElementById('radius').addEventListener('input', e => { state.radius = +e.target.value; document.getElementById('radiusVal').textContent = state.radius + '°'; runTest(); });
+document.getElementById('reshuffle').addEventListener('click', () => { seed = (seed * 7919 + 1) % 2147483647; makeSkies(); runTest(); });
+let dipTimer = null;
+document.getElementById('emin').addEventListener('input', () => { clearTimeout(dipTimer); dipTimer = setTimeout(runDipole, 60); });
+let rsTimer = null;
+function redrawAll() { drawSky(); drawDipoleMap(); runTest(); runDipole(); }
+window.addEventListener('resize', () => { clearTimeout(rsTimer); rsTimer = setTimeout(() => { drawSky(); drawDipoleMap(); }, 150); });
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', redrawAll);
+new MutationObserver(redrawAll).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+makeSkies(); runTest(); runDipole();
+</script>
